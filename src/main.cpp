@@ -1,30 +1,28 @@
 /**
- * VÍ DỤ 4: KIỂM TRA PHÂN HỆ NGUỒN (EPS) VÀ LƯU TRỮ (MICRO SD)
+ * VÍ DỤ 2-1: KIỂM TRA PHÂN HỆ NGUỒN (EPS) - ĐO ĐIỆN ÁP PIN
  * 
  * Mô tả:
- * Ví dụ này kết hợp việc đo điện áp của Pin (Li-ion/Li-po) bằng ADC của ESP32,
- * sau đó đóng gói dữ liệu và liên tục ghi log vào thẻ nhớ MicroSD để có thể 
- * phân tích mức tiêu thụ năng lượng của vệ tinh sau khi thu hồi.
+ * Ví dụ này minh họa cách sử dụng bộ chuyển đổi tương tự-số (ADC) của ESP32 
+ * để đo mức điện áp hiện tại của Pin (Li-ion/Li-po) trên hệ thống vệ tinh.
+ * Qua đó, mạch có thể tự động đưa ra các quyết định ngắt nguồn hoặc sạc.
  */
 
 #include <Arduino.h>
 #include <PTITCube.h>
 
-// KHAI BÁO CÁC ĐỐI TƯỢNG PHÂN HỆ
+// KHAI BÁO ĐỐI TƯỢNG PHÂN HỆ NGUỒN
 PTIT_EPS myBattery;
-PTIT_Storage myDisk;
 
 void setup() {
     Serial.begin(115200);
     while (!Serial) { delay(10); }
 
-    Serial.println("\n[EXAMPLE] Bắt đầu bài test Phân hệ Nguồn và Lưu trữ...");
+    Serial.println("\n[EXAMPLE] Bắt đầu bài test Phân hệ Nguồn (EPS)...");
 
-    // Khởi tạo các đối tượng
+    // Khởi tạo đối tượng
     myBattery.init();
-    myDisk.init();
     
-    Serial.println("[EXAMPLE] Bắt đầu ghi log điện áp Pin...\n");
+    Serial.println("[EXAMPLE] Bắt đầu đọc điện áp Pin liên tục...\n");
 }
 
 void loop() {
@@ -38,14 +36,13 @@ void loop() {
     // Hiển thị ra màn hình
     Serial.println(logString);
 
-    // Ghi vào thẻ nhớ
-    myDisk.logData(logString.c_str());
-
     // Cảnh báo nếu pin yếu
     if (voltage < 3.2 && voltage > 1.0) {
-        Serial.println("[WARNING] Điện áp pin quá thấp. Cần sạc hoặc ngắt các module hao pin!");
-        myDisk.logData("[WARNING] Low battery detected!");
+        Serial.println(" ---> [WARNING] Điện áp pin quá thấp. Hệ thống nên chuyển sang chế độ tiết kiệm pin!");
+    } else if (voltage > 4.1) {
+        Serial.println(" ---> [INFO] Pin đầy.");
     }
 
-    delay(5000);
+    // Đợi 2 giây trước khi đọc lần tiếp theo
+    delay(2000);
 }
