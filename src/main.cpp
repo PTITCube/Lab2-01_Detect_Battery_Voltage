@@ -22,7 +22,7 @@ void setup() {
     // Khởi tạo đối tượng
     myBattery.init();
     
-    Serial.println("[EXAMPLE] Bắt đầu đọc điện áp Pin liên tục...\n");
+    
 }
 
 void loop() {
